@@ -1,0 +1,8 @@
+node_modules/
+dist/
+.env
+1234
+1234.pub
+
+src/config/google-tts-key.json
+src/config/google-stt-key.json

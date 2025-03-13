@@ -13,7 +13,8 @@ class WebSocketService {
           }
       
           // Cihazın durumu güncelleniyor
-          await DeviceService.updateDeviceStatus(deviceId, { status, battery });
+          await DeviceService.updateDevice(deviceId, { status, batteryLevel: battery });
+
       
           console.log(`📡 Cihaz verisi güncellendi: ${deviceId}`);
           

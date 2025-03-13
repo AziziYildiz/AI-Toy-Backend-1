@@ -3,16 +3,17 @@ import ConversationService from "./conversation.service";
 import { AuthRequest } from "../../middleware/auth.middleware"; // ✅ AuthRequest tipini import et
 
 class ConversationController {
-  // 📌 **Yeni mesaj ekle (çocuk veya AI)**
-  public async addMessage(req: Request, res: Response):Promise<void> {
+  // 📌 **Yeni mesaj ekle (kullanıcı veya AI)**
+  public async addMessage(req: Request, res: Response): Promise<void> {
     try {
-      const { childId, deviceId, sender, text } = req.body;
+      const { userId, deviceId, sender, text } = req.body;
 
-      if (!childId || !deviceId || !sender || !text) {
-         res.status(400).json({ message: "Eksik veri: childId, deviceId, sender ve text zorunludur." });
+      if (!userId || !deviceId || !sender || !text) {
+        res.status(400).json({ message: "Eksik veri: userId, deviceId, sender ve text zorunludur." });
+        return;
       }
 
-      const conversation = await ConversationService.addMessage(childId, deviceId, sender, text);
+      const conversation = await ConversationService.addMessage(userId, deviceId, sender, text);
       res.status(200).json({ message: "Mesaj kaydedildi", conversation });
     } catch (error) {
       console.error("❌ Mesaj ekleme hatası:", error);
@@ -20,14 +21,15 @@ class ConversationController {
     }
   }
 
-  // 📌 **Belirli bir çocuğa ait konuşmayı getir**
+  // 📌 **Belirli bir kullanıcının konuşmasını getir**
   public async getConversation(req: Request, res: Response): Promise<void> {
     try {
-      const { childId, deviceId } = req.params;
-      const conversation = await ConversationService.getConversation(childId, deviceId);
+      const { userId, deviceId } = req.params;
+      const conversation = await ConversationService.getConversation(userId, deviceId);
 
       if (!conversation) {
-         res.status(404).json({ message: "Konuşma bulunamadı." });
+        res.status(404).json({ message: "Konuşma bulunamadı." });
+        return;
       }
 
       res.status(200).json(conversation);
@@ -38,18 +40,20 @@ class ConversationController {
   }
 
   // 📌 **Tüm konuşmaları getir (ebeveyn için)**
-  public async getAllConversations(req: AuthRequest, res: Response): Promise<void> { // ✅ Request yerine AuthRequest kullanıldı
+  public async getAllConversations(req: AuthRequest, res: Response): Promise<void> {
     try {
       if (!req.user) {
-         res.status(401).json({ message: "Yetkilendirme başarısız. Kullanıcı bilgisi alınamadı." });
-      }
-
-      const parentId = req.user?.id; 
-      if (!parentId) {
-        res.status(400).json({ message: "Parent ID is required." });
+        res.status(401).json({ message: "Yetkilendirme başarısız. Kullanıcı bilgisi alınamadı." });
         return;
       }
-      const conversations = await ConversationService.getAllConversations(parentId);
+
+      const userId = req.user?.id;
+      if (!userId) {
+        res.status(400).json({ message: "Kullanıcı ID'si gereklidir." });
+        return;
+      }
+
+      const conversations = await ConversationService.getAllConversations(userId);
       res.status(200).json(conversations);
     } catch (error) {
       console.error("❌ Konuşmalar getirme hatası:", error);

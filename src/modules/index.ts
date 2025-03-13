@@ -16,3 +16,7 @@ router.use("/conversations", conversationRoutes);
 router.use("/ai", aiRoutes); // AI modülü eklendi
 
 export default router;
+
+
+
+

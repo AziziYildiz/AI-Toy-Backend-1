@@ -1,14 +1,14 @@
 import { ConversationModel } from "./conversation.model";
 
 class ConversationService {
-  // 📌 **Mesaj ekle (çocuğun veya AI'nin mesajını kaydet)**
-  async addMessage(childId: string, deviceId: string, sender: "child" | "ai", text: string) {
+  // 📌 **Mesaj ekle (kullanıcı veya AI mesajını kaydet)**
+  async addMessage(userId: string, deviceId: string, sender: "user" | "ai", text: string) {
     try {
       // **Konuşmayı bul veya oluştur**
-      let conversation = await ConversationModel.findOne({ childId, deviceId });
+      let conversation = await ConversationModel.findOne({ userId, deviceId });
 
       if (!conversation) {
-        conversation = await ConversationModel.create({ childId, deviceId, messages: [] });
+        conversation = await ConversationModel.create({ userId, deviceId, messages: [] });
       }
 
       // **Mesajı ekleyip kaydet**
@@ -22,10 +22,10 @@ class ConversationService {
     }
   }
 
-  // 📌 **Belirli bir çocuğa ait konuşmayı getir**
-  async getConversation(childId: string, deviceId: string) {
+  // 📌 **Belirli bir kullanıcının konuşmasını getir**
+  async getConversation(userId: string, deviceId: string) {
     try {
-      return await ConversationModel.findOne({ childId, deviceId }).populate("childId").populate("deviceId");
+      return await ConversationModel.findOne({ userId, deviceId }).populate("userId").populate("deviceId");
     } catch (error) {
       console.error("❌ Konuşma getirme hatası:", error);
       throw error;
@@ -33,9 +33,9 @@ class ConversationService {
   }
 
   // 📌 **Tüm konuşmaları getir (ebeveyn için)**
-  async getAllConversations(parentId: string) {
+  async getAllConversations(userId: string) {
     try {
-      return await ConversationModel.find({}).populate("childId").populate("deviceId");
+      return await ConversationModel.find({ userId }).populate("userId").populate("deviceId");
     } catch (error) {
       console.error("❌ Konuşmalar listelenirken hata oluştu:", error);
       throw error;

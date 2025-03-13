@@ -28,10 +28,10 @@ class AIUtils {
   }
 
   /**
-   * 📌 **Ses Formatını WAV'e Dönüştürme:** AI için uygun ses formatına çevirir.
+   * 📌 **Ses Dosyasını WAV Formatına Dönüştürme:** AI için uygun ses formatına çevirir.
    * @param inputPath Kaynak ses dosyası
    * @param outputPath Dönüştürülen dosya yolu
-   * @returns Dönüştürülen dosyanın yolu
+   * @returns {Promise<string>} Dönüştürülen dosyanın yolu
    */
   static async convertToWav(inputPath: string, outputPath: string): Promise<string> {
     return new Promise((resolve, reject) => {
@@ -57,14 +57,14 @@ class AIUtils {
   /**
    * 📌 **Dosya Adı Oluşturucu:** Yüklenen her ses dosyası için benzersiz bir isim oluşturur.
    * @param extension Dosya uzantısı (örn. `.wav`, `.mp3`)
-   * @returns Rastgele üretilmiş dosya adı
+   * @returns {string} Rastgele üretilmiş dosya adı
    */
   static generateFileName(extension: string): string {
     return `${Date.now()}-${Math.floor(Math.random() * 10000)}${extension}`;
   }
 
   /**
-   * 📌 **Geçici Klasör Yönetimi:** `uploads/` klasörünün olup olmadığını kontrol eder, yoksa oluşturur.
+   * 📌 **Uploads Klasörünü Kontrol Et ve Oluştur:** `uploads/` klasörünü oluşturur.
    * @param folderPath Kontrol edilecek klasör yolu
    */
   static ensureFolderExists(folderPath: string): void {

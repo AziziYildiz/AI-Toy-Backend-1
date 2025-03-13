@@ -1,7 +1,7 @@
-import { DeviceModel, IDevice } from "./device.model";
+import { DeviceModel, IDevice, IDeviceConfig } from "./device.model";
 
 class DeviceService {
-  // Yeni cihaz oluştur
+  // **Yeni cihaz oluştur**
   public async createDevice(deviceData: Partial<IDevice>) {
     try {
       const newDevice = await DeviceModel.create(deviceData);
@@ -12,10 +12,10 @@ class DeviceService {
     }
   }
 
-  // Tüm cihazları getir
+  // **Tüm cihazları getir**
   public async getAllDevices() {
     try {
-      const devices = await DeviceModel.find().populate("owner assignedChild", "name email");
+      const devices = await DeviceModel.find();
       return { success: true, devices };
     } catch (error) {
       console.error("Cihazları getirme hatası:", error);
@@ -23,10 +23,11 @@ class DeviceService {
     }
   }
 
-  // Belirli bir cihazı ID ile getir
+ 
+  // **Belirli bir cihazı ID ile getir**
   public async getDeviceById(deviceId: string) {
     try {
-      const device = await DeviceModel.findById(deviceId).populate("owner assignedChild", "name email");
+      const device = await DeviceModel.findById(deviceId);
       if (!device) return { success: false, message: "Cihaz bulunamadı." };
       return { success: true, device };
     } catch (error) {
@@ -35,7 +36,7 @@ class DeviceService {
     }
   }
 
-  // Cihaz güncelle
+  // **Cihaz bilgilerini güncelle**
   public async updateDevice(deviceId: string, updateData: Partial<IDevice>) {
     try {
       const updatedDevice = await DeviceModel.findByIdAndUpdate(deviceId, updateData, { new: true });
@@ -47,12 +48,26 @@ class DeviceService {
     }
   }
 
+  // **Cihazın `deviceConfig` ayarlarını güncelle**
+    // 📌 Cihaz konfigürasyonunu güncelle
+    public async updateDeviceConfig(deviceId: string, configData: IDeviceConfig) {
+      try {
+        const updatedDevice = await DeviceModel.findByIdAndUpdate(
+          deviceId,
+          { deviceConfig: configData }, // Yeni konfigürasyonu güncelle
+          { new: true, runValidators: true }
+        );
   
-  async updateDeviceStatus(deviceId: string, data: Partial<{ status: string; battery: number }>) {
-    return await DeviceModel.findByIdAndUpdate(deviceId, data, { new: true });
-  }
+        if (!updatedDevice) return { success: false, message: "Cihaz bulunamadı." };
+        return { success: true, device: updatedDevice };
+      } catch (error) {
+        console.error("Cihaz konfigürasyon güncelleme hatası:", error);
+        return { success: false, message: "Cihaz konfigürasyonu güncellenemedi." };
+      }
+    }
+  
 
-  // Cihazı sil
+  // **Cihaz silme**
   public async deleteDevice(deviceId: string) {
     try {
       const deletedDevice = await DeviceModel.findByIdAndDelete(deviceId);

@@ -4,7 +4,6 @@ import AIUtils from "./ai.utils";
 import path from "path";
 import ConversationService from "../conversation/conversation.service";
 import { DeviceModel } from "../devices/device.model";
-import { UserProfileModel } from "../user_profiles/user_profiles.model";
 
 class AIController {
   async processAudio(req: Request, res: Response): Promise<void> {
@@ -14,18 +13,17 @@ class AIController {
         return;
       }
 
-      const { childId, deviceId } = req.body;
+      const { userId, deviceId } = req.body;
 
-      if (!childId || !deviceId) {
-        res.status(400).json({ message: "childId ve deviceId zorunludur." });
+      if (!userId || !deviceId) {
+        res.status(400).json({ message: "userId ve deviceId zorunludur." });
         return;
       }
 
-      // **Cihazın ve çocuğun var olup olmadığını kontrol et**
+      // **Cihazın var olup olmadığını kontrol et**
       const device = await DeviceModel.findById(deviceId);
-      const child = await UserProfileModel.findById(childId);
-      if (!device || !child) {
-        res.status(404).json({ message: "Cihaz veya çocuk bulunamadı." });
+      if (!device) {
+        res.status(404).json({ message: "Cihaz bulunamadı." });
         return;
       }
 
@@ -36,17 +34,17 @@ class AIController {
       await AIUtils.convertToWav(inputPath, wavPath);
       const text = await AIService.speechToText(wavPath);
 
-      // **Konuşmayı veritabanına kaydet (Çocuk tarafından gönderildi)**
-      await ConversationService.addMessage(childId, deviceId, "child", text);
+      // **Konuşmayı veritabanına kaydet (Kullanıcı tarafından gönderildi)**
+      await ConversationService.addMessage(userId, deviceId, "user", text);
 
       // **AI'den cevap al**
-      const aiResponse = await AIService.askAI(text, childId);
+      const aiResponse = await AIService.askAI(text, userId);
 
       // **AI'nin yanıtını konuşma geçmişine kaydet**
-      await ConversationService.addMessage(childId, deviceId, "ai", aiResponse);
+      await ConversationService.addMessage(userId, deviceId, "ai", aiResponse);
 
       // **AI cevabını sese çevir**
-      await AIService.textToSpeech(aiResponse, outputAudioPath, childId);
+      await AIService.textToSpeech(aiResponse, outputAudioPath, userId);
 
       console.log(`✅ AI yanıtı oluşturuldu ve sese çevrildi: ${outputAudioPath}`);
 
